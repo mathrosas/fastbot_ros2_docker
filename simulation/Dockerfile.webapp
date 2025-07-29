@@ -1,0 +1,28 @@
+# Dockerfile.webapp
+ARG ROS_DISTRO=humble
+FROM ros:${ROS_DISTRO}-ros-base
+
+SHELL ["/bin/bash", "-lc"]
+
+# install colcon, rosbridge, and any web dependencies
+RUN apt-get update && \
+    apt-get install -y \
+      python3-colcon-common-extensions \
+      ros-${ROS_DISTRO}-rosbridge-server \
+      nodejs npm && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+COPY ../../../../src/fastbot_webapp ./src/fastbot_webapp
+
+# install JS deps if your webapp uses npm
+RUN cd src/fastbot_webapp && npm install
+
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh && \
+    colcon build --symlink-install --packages-select fastbot_webapp
+
+RUN echo "source /workspace/install/setup.bash" >> ~/.bashrc
+
+ENTRYPOINT ["/bin/bash", "-lc"]
+# adjust the launch name if your package uses a different launch file
+CMD ["ros2", "launch", "fastbot_webapp", "webapp_launch.py"]

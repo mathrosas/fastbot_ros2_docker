@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  fastbot-ros2-gazebo:
+    build:
+      context: .
+      dockerfile: src/fastbot_ros2_docker/simulation/Dockerfile.gazebo
+    container_name: fastbot-ros2-gazebo
+    network_mode: host
+
+  fastbot-ros2-slam:
+    build:
+      context: .
+      dockerfile: src/fastbot_ros2_docker/simulation/Dockerfile.slam
+    container_name: fastbot-ros2-slam
+    network_mode: host
+
+  fastbot-ros2-webapp:
+    build:
+      context: .
+      dockerfile: src/fastbot_ros2_docker/simulation/Dockerfile.webapp
+    container_name: fastbot-ros2-webapp
+    network_mode: host
+    ports:
+      - "7000:80"
+      # - "9090:9090"

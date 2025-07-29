@@ -1,0 +1,23 @@
+# Dockerfile.slam
+ARG ROS_DISTRO=humble
+FROM ros:${ROS_DISTRO}-ros-base
+
+SHELL ["/bin/bash", "-lc"]
+
+# install colcon and Cartographer
+RUN apt-get update && \
+    apt-get install -y \
+      python3-colcon-common-extensions \
+      ros-${ROS_DISTRO}-cartographer-ros && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+COPY ../../../../src/fastbot/fastbot_slam ./src/fastbot_slam
+
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh && \
+    colcon build --symlink-install
+
+RUN echo "source /workspace/install/setup.bash" >> ~/.bashrc
+
+ENTRYPOINT ["/bin/bash", "-lc"]
+CMD ["ros2", "launch", "fastbot_slam", "cartographer.launch.py"]

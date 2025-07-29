@@ -1,0 +1,29 @@
+# Dockerfile.gazebo
+ARG ROS_DISTRO=humble
+FROM ros:${ROS_DISTRO}-desktop
+
+# use bash-login shell so entrypoint and .bashrc are sourced correctly
+SHELL ["/bin/bash", "-lc"]
+
+# install colcon, Gazebo-ROS packages and teleop
+RUN apt-get update && \
+    apt-get install -y \
+      python3-colcon-common-extensions \
+      ros-${ROS_DISTRO}-gazebo-ros-pkgs \
+      ros-${ROS_DISTRO}-teleop-twist-keyboard && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy your FastBot packages into the workspace
+WORKDIR /workspace
+COPY ../../../../src/fastbot/fastbot_gazebo ./src/fastbot_gazebo
+
+# Build
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh && \
+    colcon build --symlink-install
+
+# Make sure each new shell sources the overlay
+RUN echo "source /workspace/install/setup.bash" >> ~/.bashrc
+
+# Default entrypoint launches the simulation
+ENTRYPOINT ["/bin/bash", "-lc"]
+CMD ["ros2", "launch", "fastbot_gazebo", "one_fastbot_room.launch.py"]
