@@ -1,0 +1,31 @@
+FROM osrf/ros:humble-desktop
+
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get update && \
+    apt-get install -y \
+      python3-colcon-common-extensions \
+      ros-humble-rosbridge-server \
+      ros-humble-rmw-cyclonedds-cpp \
+      ros-humble-cyclonedds && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY fastbot_ros2_docker/fastbot_webapp /ros2_ws/src/fastbot_webapp
+
+RUN source /opt/ros/humble/setup.bash \
+ && cd /ros2_ws \
+ && colcon build --symlink-install
+RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
+
+WORKDIR /ros2_ws
+
+ENV ROS_DOMAIN_ID=1
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+EXPOSE 7000 9090
+
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["source /opt/ros/humble/setup.bash && source /ros2_ws/install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml & \
+  sleep 5 && \
+  cd /ros2_ws/src/fastbot_webapp && \
+  python3 -m http.server 7000"]

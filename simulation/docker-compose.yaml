@@ -1,0 +1,60 @@
+version: "3.7"
+
+services:
+  fastbot-ros2-gazebo:
+    build:
+      context: ../..
+      dockerfile: fastbot_ros2_docker/simulation/Dockerfile.gazebo
+    container_name: fastbot-ros2-gazebo
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ~/.Xauthority:/root/.Xauthority:ro
+    networks:
+      - ros-network
+    restart: unless-stopped
+
+  fastbot-ros2-slam:
+    build:
+      context: ../..
+      dockerfile: fastbot_ros2_docker/simulation/Dockerfile.slam
+    container_name: fastbot-ros2-slam
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ~/.Xauthority:/root/.Xauthority:ro       # <— fixed indentation
+    networks:
+      - ros-network
+    depends_on:
+      - fastbot-ros2-gazebo
+    restart: unless-stopped
+
+  fastbot-ros2-webapp:
+    build:
+      context: ../..
+      dockerfile: fastbot_ros2_docker/simulation/Dockerfile.webapp
+    container_name: fastbot-ros2-webapp
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=1
+    ports:
+      - "7000:7000"
+      - "9090:9090"
+    networks:
+      - ros-network
+    depends_on:
+      - fastbot-ros2-gazebo
+      - fastbot-ros2-slam
+    restart: unless-stopped
+
+networks:
+  ros-network:
+    driver: bridge
