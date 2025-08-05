@@ -5,12 +5,23 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get update && \
     apt-get install -y \
       python3-colcon-common-extensions \
-      ros-humble-rosbridge-server \
+      python3-pip \
+      git \
+      ffmpeg \
+      ros-humble-async-web-server-cpp \
+      ros-humble-web-video-server \
       ros-humble-rmw-cyclonedds-cpp \
-      ros-humble-cyclonedds && \
+      ros-humble-cyclonedds \
+      ros-humble-rosbridge-server && \
     rm -rf /var/lib/apt/lists/*
 
 COPY fastbot_ros2_docker/fastbot_webapp /ros2_ws/src/fastbot_webapp
+
+RUN cd /ros2_ws/src && \
+    git clone https://github.com/Wisc-HCI/tf2_web_republisher_py.git # && \
+#    git clone --branch 2.0.0 --depth 1 https://github.com/RobotWebTools/rosbridge_suite.git
+
+RUN pip3 install pyquaternion
 
 RUN source /opt/ros/humble/setup.bash \
  && cd /ros2_ws \
@@ -22,10 +33,14 @@ WORKDIR /ros2_ws
 ENV ROS_DOMAIN_ID=1
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
-EXPOSE 7000 9090
+EXPOSE 7000 9090 11315
 
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["source /opt/ros/humble/setup.bash && source /ros2_ws/install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml & \
-  sleep 5 && \
-  cd /ros2_ws/src/fastbot_webapp && \
-  python3 -m http.server 7000"]
+#ENTRYPOINT ["/bin/bash", "-c"]
+#CMD ["source /opt/ros/humble/setup.bash && source /ros2_ws/install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml & \
+#  sleep 5 && \
+#  cd /ros2_ws/src/fastbot_webapp && \
+#  python3 -m http.server 7000"]
+
+COPY fastbot_ros2_docker/simulation/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

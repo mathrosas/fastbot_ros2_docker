@@ -48,6 +48,7 @@ services:
     ports:
       - "7000:7000"
       - "9090:9090"
+      - "11315:11315"
     networks:
       - ros-network
     depends_on:

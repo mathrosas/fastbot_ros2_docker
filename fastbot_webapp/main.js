@@ -163,8 +163,7 @@ var vueApp = new Vue({
             this.mapViewer = new ROS2D.Viewer({
                 divID: 'divMapViewer',
                 width: mapDiv.clientWidth,
-                height: mapDiv.clientHeight,
-                fixedFrame: 'map'
+                height: mapDiv.clientHeight
             })
 
             // 2) subscribe to the /map topic and draw it, continuously
