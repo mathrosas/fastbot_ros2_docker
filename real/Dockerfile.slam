@@ -1,11 +1,17 @@
-FROM osrf/ros:humble-ros-core
+FROM osrf/ros:humble-desktop
 
 RUN apt-get update && apt-get install -y \
-      python3-colcon-common-extensions \
-      git \
-      ros-humble-cartographer \
-      ros-humble-cartographer-ros \
-    && rm -rf /var/lib/apt/lists/*
+    ros-humble-cartographer \
+    ros-humble-cartographer-ros \
+    ros-humble-robot-state-publisher \
+    ros-humble-joint-state-publisher \
+    ros-humble-xacro \
+    ros-humble-tf2-ros \
+    ros-humble-tf2-tools \
+    ros-humble-cyclonedds \
+    ros-humble-rmw-cyclonedds-cpp \
+    python3-colcon-common-extensions \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ros2_ws/src
 RUN git clone --depth 1 https://github.com/mathrosas/fastbot.git
