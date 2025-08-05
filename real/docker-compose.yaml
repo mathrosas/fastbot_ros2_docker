@@ -4,17 +4,32 @@ services:
   fastbot-ros2-real:
     build:
       context: .
-      dockerfile: Dockerfile.real
-    network_mode: host
+      dockerfile: Dockerfile.fastbot-ros2-real
+    container_name: fastbot-ros2-real
     privileged: true
     devices:
       - "/dev/ttyUSB0:/dev/ttyUSB0"
       - "/dev/ttyACM0:/dev/ttyACM0"
+    environment:
+      - ROS_DOMAIN_ID=1
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    networks:
+      - fastbot-net
     restart: always
 
   fastbot-ros2-slam-real:
     build:
       context: .
-      dockerfile: Dockerfile.slam
-    network_mode: host
+      dockerfile: Dockerfile.fastbot-ros2-slam-real
+    container_name: fastbot-ros2-slam-real
+    privileged: true
+    environment:
+      - ROS_DOMAIN_ID=1
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    networks:
+      - fastbot-net
     restart: always
+
+networks:
+  fastbot-net:
+    driver: bridge

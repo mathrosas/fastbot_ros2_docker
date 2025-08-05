@@ -1,0 +1,38 @@
+FROM osrf/ros:humble-desktop
+
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get update && apt-get install -y \
+    ros-humble-joint-state-publisher \
+    ros-humble-robot-state-publisher \
+    ros-humble-cartographer \
+    ros-humble-cartographer-ros \
+    ros-humble-teleop-twist-keyboard \
+    ros-humble-teleop-twist-joy \
+    ros-humble-xacro \
+    ros-humble-nav2-* \
+    ros-humble-urdf \
+    python3-colcon-common-extensions \
+    python3-serial \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /ros2_ws/src
+RUN git clone --depth 1 https://github.com/mathrosas/fastbot.git
+
+WORKDIR /ros2_ws
+RUN source /opt/ros/humble/setup.bash && \
+    colcon build --symlink-install \
+      --packages-select \
+        Lslidar_ROS2_driver \
+        serial_motor_msgs \
+        serial_motor \
+        fastbot_description \
+        fastbot_bringup
+
+RUN echo "source /ros2_ws/install/setup.bash" >> /root/.bashrc
+
+ENTRYPOINT ["/bin/bash","-c","\
+  source /opt/ros/humble/setup.bash && \
+  source /ros2_ws/install/setup.bash && \
+  exec ros2 launch fastbot_bringup bringup.launch.py\
+"]

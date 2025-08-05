@@ -1,0 +1,9 @@
+FROM real_fastbot-ros2-real:latest
+
+SHELL ["/bin/bash", "-c"]
+
+ENTRYPOINT ["bash","-c","\
+  source /opt/ros/humble/setup.bash && \
+  source /ros2_ws/install/setup.bash && \
+  exec ros2 launch fastbot_slam cartographer.launch.py slam:=True\
+"]
