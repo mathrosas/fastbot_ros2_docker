@@ -1,37 +1,20 @@
-FROM osrf/ros:humble-desktop
+FROM nvidia_ros2:latest
 
-SHELL ["/bin/bash", "-c"]
+# Change the default shell to Bash
+SHELL [ "/bin/bash" , "-c" ]
 
-RUN apt-get update && apt-get install -y \
-  ros-humble-gazebo-ros-pkgs \
-  ros-humble-gazebo-ros2-control \
-  ros-humble-ros2-control \
-  ros-humble-ros2-controllers \
-  ros-humble-joint-state-publisher \
-  ros-humble-robot-state-publisher \
-  ros-humble-robot-localization \
-  ros-humble-xacro \
-  ros-humble-tf2-ros \
-  ros-humble-tf2-tools \
-  ros-humble-ros2-control \
-  ros-humble-ros2-controllers \
-  ros-humble-cyclonedds \
-  ros-humble-rmw-cyclonedds-cpp \
-  python3-colcon-common-extensions \
-  && rm -rf /var/lib/apt/lists/*
+# Create an overlay workspace
+RUN mkdir -p /colcon_ws/src
+COPY ./fastbot_gazebo /colcon_ws/src/fastbot_gazebo
+COPY ./fastbot_description /colcon_ws/src/fastbot_description
 
-COPY fastbot/fastbot_gazebo /ros2_ws/src/fastbot_gazebo
-COPY fastbot/fastbot_description /ros2_ws/src/fastbot_description
+# Add models to the gazebo path
+# ENV GAZEBO_MODEL_PATH=/colcon_ws/install/fastbot_description/share/fastbot_description/models:/colcon_ws/install/fastbot_description/share/fastbot_description/onshape/assets:${GAZEBO_MODEL_PATH}
+# ENV GAZEBO_RESOURCE_PATH=/colcon_ws/install/fastbot_description/share/fastbot_description/models/meshes:/colcon_ws/install/fastbot_description/share/fastbot_description/onshape/assets:${GAZEBO_RESOURCE_PATH}
 
 RUN source /opt/ros/humble/setup.bash \
- && cd /ros2_ws \
- && colcon build --symlink-install
-RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
+ && cd /colcon_ws \
+ && colcon build
 
-WORKDIR /ros2_ws
-
-ENV ROS_DOMAIN_ID=1
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["source /opt/ros/humble/setup.bash && source /ros2_ws/install/setup.bash && ros2 launch fastbot_gazebo one_fastbot_room.launch.py"]
+# Set up the work directory
+WORKDIR /colcon_ws

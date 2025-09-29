@@ -1,25 +1,26 @@
-FROM osrf/ros:humble-desktop
+FROM ros:humble-ros-base-jammy
 
-SHELL ["/bin/bash", "-c"]
+# Change the default shell to Bash
+SHELL [ "/bin/bash" , "-c" ]
 
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt upgrade -y && apt install -y \
     python3-colcon-common-extensions \
+    ros-humble-rviz2 \
+    ros-humble-nav2-msgs \
+    ros-humble-nav2-amcl \
+    ros-humble-nav2-map-server \
+    ros-humble-nav2-planner \
+    ros-humble-nav2-bringup \
+    ros-humble-nav2-bt-navigator \
     ros-humble-cartographer-ros \
-    ros-humble-rmw-cyclonedds-cpp \
-    ros-humble-cyclonedds \
     && rm -rf /var/lib/apt/lists/*
 
-COPY fastbot/fastbot_slam /ros2_ws/src/fastbot_slam
-
+# Create a ROS2 workspace and build
+RUN mkdir -p /colcon_ws/src
+COPY ./fastbot_slam /colcon_ws/src/fastbot_slam
 RUN source /opt/ros/humble/setup.bash \
- && cd /ros2_ws \
- && colcon build --symlink-install
-RUN echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc
+ && cd /colcon_ws \
+ && colcon build
 
-WORKDIR /ros2_ws/
-
-ENV ROS_DOMAIN_ID=1
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["source /opt/ros/humble/setup.bash && source /ros2_ws/install/setup.bash && ros2 launch fastbot_slam cartographer.launch.py"]
+# Set up the work directory
+WORKDIR /colcon_ws

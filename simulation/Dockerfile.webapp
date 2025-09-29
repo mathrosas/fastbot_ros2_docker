@@ -1,25 +1,27 @@
-FROM osrf/ros:humble-ros-core
+FROM ros:humble-ros-base-jammy
 
-RUN apt-get update && apt-get install -y \
-      python3-colcon-common-extensions \
-      git \
-      ros-humble-cartographer \
-      ros-humble-cartographer-ros \
+# Change the default shell to Bash
+SHELL [ "/bin/bash" , "-c" ]
+
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y nginx ros-humble-rosbridge-suite \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /ros2_ws/src
-RUN git clone --depth 1 https://github.com/mathrosas/fastbot.git
+RUN pip3 install --no-cache-dir pyquaternion
 
-WORKDIR /ros2_ws
-RUN . /opt/ros/humble/setup.bash \
- && colcon build --symlink-install \
-      --packages-select \
-        Lslidar_ROS2_driver \
-        fastbot_description \
-        fastbot_bringup
+# Copying the local entrypoint.sh file to /entrypoint.sh in the docker image
+COPY ./entrypoint.sh /entrypoint.sh
 
-CMD ["/bin/bash","-lc","\
-  source /opt/ros/humble/setup.bash && \
-  source /ros2_ws/install/setup.bash && \
-  exec ros2 launch fastbot_bringup bringup_slam_real.launch.py\
-"]
+# Copying the local to /var/www/html in the docker image
+COPY ./fastbot_webapp /var/www/html
+COPY ./nginx.conf /etc/nginx/sites-available/
+RUN ln -sf /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/
+
+# /bin/bash is the command we want to execute when running a docker container
+ENTRYPOINT ["/bin/bash"]
+
+# We want /bin/bash to execute our /entrypoint.sh when container starts
+CMD ["/entrypoint.sh"]
+
+# Set up the work directory
+WORKDIR /var/www/html

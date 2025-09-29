@@ -1,61 +1,53 @@
-version: "3.7"
-
+version: '3'
 services:
   fastbot-ros2-gazebo:
-    build:
-      context: ../..
-      dockerfile: fastbot_ros2_docker/simulation/Dockerfile.gazebo
+    image: mathros/mathiasrosas-cp22:fastbot-ros2-gazebo
     container_name: fastbot-ros2-gazebo
     environment:
       - DISPLAY=${DISPLAY}
-      - QT_X11_NO_MITSHM=1
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - ROS_DOMAIN_ID=1
+      - ROS_DOMAIN_ID=0
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:ro
-      - ~/.Xauthority:/root/.Xauthority:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    privileged: true
     networks:
-      - ros-network
-    restart: unless-stopped
-
+      - fastbot-network
+    restart: always
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["source install/setup.bash && ros2 launch fastbot_gazebo one_fastbot_room.launch.py"]
+  
   fastbot-ros2-slam:
-    build:
-      context: ../..
-      dockerfile: fastbot_ros2_docker/simulation/Dockerfile.slam
+    image: mathros/mathiasrosas-cp22:fastbot-ros2-slam
     container_name: fastbot-ros2-slam
     environment:
       - DISPLAY=${DISPLAY}
-      - QT_X11_NO_MITSHM=1
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - ROS_DOMAIN_ID=1
+      - ROS_DOMAIN_ID=0
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:ro
-      - ~/.Xauthority:/root/.Xauthority:ro       # <— fixed indentation
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    privileged: true
     networks:
-      - ros-network
-    depends_on:
-      - fastbot-ros2-gazebo
-    restart: unless-stopped
-
+      - fastbot-network
+    restart: always
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["sleep 20 && source install/setup.bash && ros2 launch fastbot_slam navigation.launch.py"]
+  
   fastbot-ros2-webapp:
-    build:
-      context: ../..
-      dockerfile: fastbot_ros2_docker/simulation/Dockerfile.webapp
+    image: mathros/mathiasrosas-cp22:fastbot-ros2-webapp
     container_name: fastbot-ros2-webapp
+    hostname: fastbot-ros2-webapp
+    privileged: true
     environment:
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - ROS_DOMAIN_ID=1
-    ports:
-      - "7000:7000"
-      - "9090:9090"
-      - "11315:11315"
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - logs:/var/log/nginx
     networks:
-      - ros-network
-    depends_on:
-      - fastbot-ros2-gazebo
-      - fastbot-ros2-slam
-    restart: unless-stopped
+      - fastbot-network
+    ports:
+      - "7000:80"
+      - "9090:9090"
+    restart: always
 
+volumes:
+  logs: {}
 networks:
-  ros-network:
+  fastbot-network:
     driver: bridge

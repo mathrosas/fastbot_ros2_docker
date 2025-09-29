@@ -19,4 +19,4 @@ ros2 launch rosbridge_server rosbridge_websocket_launch.xml &
 sleep 5
 
 cd /ros2_ws/src/fastbot_webapp
-exec python3 -m http.server 7000
+exec python3 -m http.server 80
