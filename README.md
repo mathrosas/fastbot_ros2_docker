@@ -1,4 +1,4 @@
-# The Fastbot ROS2 Dockers
+# Checkpoint 22: Docker for Robotics
 
 This repository contains Docker ROS 2 images and compose files to operate and extend the **Fastbot** robot. Running a containerized ROS 2 environment enables testing in the **Gazebo** simulator and seamless deployment of **SLAM** and navigation on the real robot—without polluting your host setup.
 
