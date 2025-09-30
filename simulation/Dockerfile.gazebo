@@ -1,20 +1,20 @@
-FROM nvidia_ros2:latest
+FROM mathros/mathiasrosas-cp22:nvidia_ros2
 
 # Change the default shell to Bash
 SHELL [ "/bin/bash" , "-c" ]
 
 # Create an overlay workspace
-RUN mkdir -p /colcon_ws/src
-COPY ./fastbot_gazebo /colcon_ws/src/fastbot_gazebo
-COPY ./fastbot_description /colcon_ws/src/fastbot_description
+RUN mkdir -p /ros2_ws/src
+COPY ./fastbot/fastbot_gazebo /ros2_ws/src/fastbot_slam
+COPY ./fastbot/fastbot_description /ros2_ws/src/fastbot_description
 
 # Add models to the gazebo path
-# ENV GAZEBO_MODEL_PATH=/colcon_ws/install/fastbot_description/share/fastbot_description/models:/colcon_ws/install/fastbot_description/share/fastbot_description/onshape/assets:${GAZEBO_MODEL_PATH}
-# ENV GAZEBO_RESOURCE_PATH=/colcon_ws/install/fastbot_description/share/fastbot_description/models/meshes:/colcon_ws/install/fastbot_description/share/fastbot_description/onshape/assets:${GAZEBO_RESOURCE_PATH}
+# ENV GAZEBO_MODEL_PATH=/ros2_ws/install/fastbot_description/share/fastbot_description/models:/ros2_ws/install/fastbot_description/share/fastbot_description/onshape/assets:${GAZEBO_MODEL_PATH}
+# ENV GAZEBO_RESOURCE_PATH=/ros2_ws/install/fastbot_description/share/fastbot_description/models/meshes:/ros2_ws/install/fastbot_description/share/fastbot_description/onshape/assets:${GAZEBO_RESOURCE_PATH}
 
 RUN source /opt/ros/humble/setup.bash \
- && cd /colcon_ws \
+ && cd /ros2_ws \
  && colcon build
 
 # Set up the work directory
-WORKDIR /colcon_ws
+WORKDIR /ros2_ws

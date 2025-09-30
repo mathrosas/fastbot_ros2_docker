@@ -5,16 +5,17 @@ SHELL [ "/bin/bash" , "-c" ]
 
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install -y nginx ros-humble-rosbridge-suite \
+    python3-pip python3-setuptools python3-wheel \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir pyquaternion
 
 # Copying the local entrypoint.sh file to /entrypoint.sh in the docker image
-COPY ./entrypoint.sh /entrypoint.sh
+COPY ./fastbot_ros2_docker/simulation/entrypoint.sh /entrypoint.sh
 
 # Copying the local to /var/www/html in the docker image
-COPY ./fastbot_webapp /var/www/html
-COPY ./nginx.conf /etc/nginx/sites-available/
+COPY ./fastbot_ros2_docker/fastbot_webapp /var/www/html
+COPY ./fastbot_ros2_docker/fastbot_webapp/nginx.conf /etc/nginx/sites-available/
 RUN ln -sf /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/
 
 # /bin/bash is the command we want to execute when running a docker container

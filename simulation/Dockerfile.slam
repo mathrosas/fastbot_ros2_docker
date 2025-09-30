@@ -16,11 +16,11 @@ RUN apt update && apt upgrade -y && apt install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a ROS2 workspace and build
-RUN mkdir -p /colcon_ws/src
-COPY ./fastbot_slam /colcon_ws/src/fastbot_slam
+RUN mkdir -p /ros2_ws/src
+COPY ./fastbot/fastbot_slam /ros2_ws/src/fastbot_slam
 RUN source /opt/ros/humble/setup.bash \
- && cd /colcon_ws \
+ && cd /ros2_ws \
  && colcon build
 
 # Set up the work directory
-WORKDIR /colcon_ws
+WORKDIR /ros2_ws
