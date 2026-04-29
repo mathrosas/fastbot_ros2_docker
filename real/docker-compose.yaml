@@ -16,7 +16,7 @@ services:
     privileged: true
     network_mode: host
     restart: always
-    entrypoint: /entrypoint.sh
+    entrypoint: ["bash", "/entrypoint.sh"]
     command: ["ros2 launch fastbot_bringup bringup.launch.xml"]
   
   fastbot-ros2-slam-real:
@@ -34,5 +34,5 @@ services:
     privileged: true
     network_mode: host
     restart: always
-    entrypoint: /entrypoint.sh
+    entrypoint: ["bash", "/entrypoint.sh"]
     command: ["sleep 8 && ros2 launch fastbot_slam cartographer.launch.py"]
